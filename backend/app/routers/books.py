@@ -20,8 +20,13 @@ def upload_book(file: UploadFile = File(...), db: Session = Depends(get_db)):
     file_bytes = file.file.read()
     storage_path = save_pdf(book_id, file_bytes)
 
-    parsed = parse_pdf(storage_path)
-    display_title = parsed.title if parsed.title != "Untitled" else file.filename.replace(".pdf", "")
+    try:
+        parsed = parse_pdf(storage_path)
+    except Exception:
+        delete_pdf(book_id)
+        raise HTTPException(status_code=422, detail="Could not parse PDF")
+
+    display_title = parsed.title if parsed.title != "Untitled" else file.filename.removesuffix(".pdf")
 
     book = Book(
         id=book_id,
