@@ -24,6 +24,13 @@ def test_book_chapter_relationship(db):
 
 
 def test_progress_defaults(db):
+    book = Book(
+        id="b1", title="Test Book", author="Author",
+        filename="test.pdf", storage_path="/tmp/test.pdf", total_words=0,
+    )
+    db.add(book)
+    db.flush()
+
     progress = ReadingProgress(book_id="b1", word_index=42, wpm=300)
     db.add(progress)
     db.commit()

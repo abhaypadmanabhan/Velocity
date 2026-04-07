@@ -24,11 +24,15 @@ def setup_db(tmp_path):
 
 @pytest.fixture
 def db():
-    session = TestingSession()
+    conn = test_engine.connect()
+    trans = conn.begin()
+    session = TestingSession(bind=conn)
     try:
         yield session
     finally:
         session.close()
+        trans.rollback()
+        conn.close()
 
 
 @pytest.fixture
