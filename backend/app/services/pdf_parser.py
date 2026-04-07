@@ -27,22 +27,21 @@ def _split_words(text: str) -> list[str]:
 
 
 def parse_pdf(path: str) -> ParsedBook:
-    doc = fitz.open(path)
-    title = doc.metadata.get("title") or "Untitled"
-    author = doc.metadata.get("author") or ""
+    with fitz.open(path) as doc:
+        title = doc.metadata.get("title") or "Untitled"
+        author = doc.metadata.get("author") or ""
 
-    toc = doc.get_toc()  # [[level, title, page_number], ...]
-    chapters = _parse_with_toc(doc, toc) if toc else _parse_with_heuristics(doc)
+        toc = doc.get_toc()  # [[level, title, page_number], ...]
+        chapters = _parse_with_toc(doc, toc) if toc else _parse_with_heuristics(doc)
 
-    if not chapters:
-        full_text = _fix_hyphenation("".join(p.get_text() for p in doc))
-        chapters = [ParsedChapter(title="Full Document", index=0, words=_split_words(full_text))]
+        if not chapters:
+            full_text = _fix_hyphenation("".join(p.get_text() for p in doc))
+            chapters = [ParsedChapter(title="Full Document", index=0, words=_split_words(full_text))]
 
-    all_words: list[str] = []
-    for ch in chapters:
-        all_words.extend(ch.words)
+        all_words: list[str] = []
+        for ch in chapters:
+            all_words.extend(ch.words)
 
-    doc.close()
     return ParsedBook(title=title, author=author, chapters=chapters, all_words=all_words)
 
 
@@ -56,7 +55,7 @@ def _parse_with_toc(doc: fitz.Document, toc: list) -> list[ParsedChapter]:
         text = _fix_hyphenation("".join(doc[p].get_text() for p in pages))
         words = _split_words(text)
         if words:
-            chapters.append(ParsedChapter(title=ch_title, index=i, words=words))
+            chapters.append(ParsedChapter(title=ch_title, index=len(chapters), words=words))
 
     return chapters
 
@@ -78,9 +77,10 @@ def _parse_with_heuristics(doc: fitz.Document) -> list[ParsedChapter]:
                     continue
                 max_size = max((s["size"] for s in line["spans"]), default=0)
                 is_heading = len(line_text) < 80 and max_size >= 14 and heading_re.match(line_text)
-                if is_heading and current_words:
-                    chapters.append(ParsedChapter(title=current_title, index=idx, words=current_words))
-                    idx += 1
+                if is_heading:
+                    if current_words:
+                        chapters.append(ParsedChapter(title=current_title, index=idx, words=current_words))
+                        idx += 1
                     current_title = line_text
                     current_words = []
                 else:

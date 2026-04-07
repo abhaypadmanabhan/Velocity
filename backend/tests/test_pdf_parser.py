@@ -1,6 +1,6 @@
 import fitz
 import pytest
-from app.services.pdf_parser import parse_pdf, ParsedBook, ParsedChapter
+from app.services.pdf_parser import parse_pdf, ParsedBook
 
 
 def make_pdf(tmp_path, pages: list[str], title="Test", author="Auth") -> str:
