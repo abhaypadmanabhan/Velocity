@@ -12,9 +12,9 @@
   --color-muted: #4a2c5a;
   --color-accent-purple: #dbb8ff;
 
-  /* Font families */
-  --font-display: "Space Grotesk", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* Font families — resolved at runtime from next/font CSS variables */
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
 
   /* Zero border radius (brutalist) */
   --radius: 0px;

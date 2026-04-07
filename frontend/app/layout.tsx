@@ -20,10 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`dark ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
-      <body
-        className="bg-bg-dark text-white font-display min-h-screen"
-        style={{ backgroundColor: "#120216" }}
-      >
+      <body className="bg-bg-dark text-white font-display min-h-screen">
         {children}
       </body>
     </html>
