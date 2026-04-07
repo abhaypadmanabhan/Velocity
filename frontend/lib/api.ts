@@ -35,9 +35,10 @@ function snakeToCamelProgress(raw: Record<string, unknown>): Progress {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
   const res = await fetch(`${BASE}${path}`, init)
-  if (!res.ok) throw new Error(`API ${init?.method ?? "GET"} ${path} failed: ${res.status}`)
+  if (!res.ok) throw Object.assign(new Error(`API ${init?.method ?? "GET"} ${path} failed: ${res.status}`), { status: res.status })
+  if (res.status === 204) return null
   return res.json()
 }
 
@@ -66,9 +67,10 @@ export const api = {
   async getProgress(bookId: string): Promise<Progress | null> {
     try {
       const raw = await request<Record<string, unknown>>(`/books/${bookId}/progress`)
-      return snakeToCamelProgress(raw)
-    } catch {
-      return null
+      return raw ? snakeToCamelProgress(raw) : null
+    } catch (err) {
+      if ((err as { status?: number }).status === 404) return null
+      throw err
     }
   },
 
