@@ -140,7 +140,7 @@ progress   — book_id, word_index, wpm, last_read_at
 ### Reader (`/book/[id]/read`)
 - **`ChapterHeader`** — fixed at the top of the reader below the progress bar. Displays the current chapter title/number in Space Grotesk, muted color (`#4a2c5a`) so it's present but doesn't compete with the focal word. Updates instantly when the word index crosses a chapter boundary
 - **`RSVPDisplay`** — centered single word in JetBrains Mono, large. ORP anchor letter in red (`#ee1438`), surrounding letters white. Position never shifts
-- **`ContextScroll`** — scrolling paragraph view below the RSVP focal point. Renders the full chapter text in muted colors (`#4a2c5a` base, `#dbb8ff` at low opacity for read words). The current word is softly highlighted (slightly brighter than surrounding text, never full white — no bold/red). As words advance, the paragraph auto-scrolls smoothly so the current word stays vertically centered in the view. Gives spatial reference without pulling eye away from focal point. Pointer events disabled — read-only, no interaction
+- **`ContextSnippet`** — static text window below the RSVP focal point showing the surrounding sentence or short paragraph (±~15 words around current index). Rendered in muted color (`#4a2c5a`). The current word is softly highlighted (slightly brighter, `#dbb8ff` at low opacity — never full white, no bold/red). As words advance the snippet updates in place — no scrolling, just the window of text shifts to keep the current word centered in it. Acts as a "you are here" marker in the prose. Pointer events disabled — read-only, no interaction
 - **`WPMSlider`** — horizontal slider, 100–1000 WPM range, live label. Built on shadcn `Slider`
 - **`ReaderControls`** — Play/Pause, back/forward 10 words, chapter selector. Full keyboard support
 - **`ProgressBar`** — thin red line across top showing position within chapter
@@ -190,7 +190,7 @@ Pause      → clearInterval, save progress to IndexedDB immediately
 Seek       → clear + restart interval at new index
 WPM change → clear + restart interval at new speed
 Word tick  → if currentIndex crosses chapter boundary, update currentChapterId
-           → emit scroll signal to ContextScroll with new currentIndex
+           → ContextSnippet re-derives its window from currentIndex (±~15 words)
 ```
 
 **Optimal Recognition Point (ORP):** Anchor letter (~30% into word) fixed at horizontal center, rendered red. Eye never moves.
