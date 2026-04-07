@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.db import Base, get_db, settings
 
-TEST_DB_URL = "sqlite:///./test_velocity.db"
+TEST_DB_URL = "sqlite://"
 
 test_engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
 TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
