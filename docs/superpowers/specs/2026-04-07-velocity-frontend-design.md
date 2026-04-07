@@ -138,7 +138,9 @@ progress   — book_id, word_index, wpm, last_read_at
 - **`ChapterItem`** — chapter title, word range, "Continue" if in-progress / "Read" if untouched
 
 ### Reader (`/book/[id]/read`)
+- **`ChapterHeader`** — fixed at the top of the reader below the progress bar. Displays the current chapter title/number in Space Grotesk, muted color (`#4a2c5a`) so it's present but doesn't compete with the focal word. Updates instantly when the word index crosses a chapter boundary
 - **`RSVPDisplay`** — centered single word in JetBrains Mono, large. ORP anchor letter in red (`#ee1438`), surrounding letters white. Position never shifts
+- **`ContextScroll`** — scrolling paragraph view below the RSVP focal point. Renders the full chapter text in muted colors (`#4a2c5a` base, `#dbb8ff` at low opacity for read words). The current word is softly highlighted (slightly brighter than surrounding text, never full white — no bold/red). As words advance, the paragraph auto-scrolls smoothly so the current word stays vertically centered in the view. Gives spatial reference without pulling eye away from focal point. Pointer events disabled — read-only, no interaction
 - **`WPMSlider`** — horizontal slider, 100–1000 WPM range, live label. Built on shadcn `Slider`
 - **`ReaderControls`** — Play/Pause, back/forward 10 words, chapter selector. Full keyboard support
 - **`ProgressBar`** — thin red line across top showing position within chapter
@@ -181,12 +183,14 @@ User drops PDF
 ```
 interval = 60000 / WPM  (ms per word)
 
-State: { words[], currentIndex, isPlaying, wpm }
+State: { words[], currentIndex, isPlaying, wpm, currentChapterId }
 
 Play       → setInterval fires every interval ms, increments currentIndex
 Pause      → clearInterval, save progress to IndexedDB immediately
 Seek       → clear + restart interval at new index
 WPM change → clear + restart interval at new speed
+Word tick  → if currentIndex crosses chapter boundary, update currentChapterId
+           → emit scroll signal to ContextScroll with new currentIndex
 ```
 
 **Optimal Recognition Point (ORP):** Anchor letter (~30% into word) fixed at horizontal center, rendered red. Eye never moves.
