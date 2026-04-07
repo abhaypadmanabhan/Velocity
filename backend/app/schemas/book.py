@@ -22,5 +22,6 @@ class BookSchema(BaseModel):
     total_words: int
     created_at: datetime
     chapters: list[ChapterSchema] = []
+    # storage_path intentionally excluded — filesystem path is internal
 
     model_config = {"from_attributes": True}
