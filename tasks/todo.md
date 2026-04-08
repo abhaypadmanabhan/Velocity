@@ -1,10 +1,17 @@
-# Dashboard and Stats Implementation
+# Todo List
 
-- [x] Backend: Create `app/routers/stats.py`
-- [x] Backend: Include `stats.py` inside `app/main.py`
-- [x] Frontend: Add `Stats` interface in `types/index.ts`
-- [x] Frontend: Add `api.getStats()` in `lib/api.ts`
-- [x] Frontend: Update Tailwind colors and styles in `app/globals.css`
-- [x] Frontend: Implement `DashboardLayout` or update `app/page.tsx`
-- [x] Frontend: Add logic to switch between Global Stats and Book Stats
-- [x] Git: Commit and push changes
+## Current Task: Cognitive Analytics Implementation
+
+1. **Plan First** (Done - Approved)
+2. **Verify Plan** (Done)
+3. **Track Progress**
+   - [x] Extract `NavRail.tsx` frontend component
+   - [x] Refactor `app/page.tsx` to use NavRail.
+   - [x] Support `/analytics` mapping in NavRail.
+   - [x] Setup `app/analytics/page.tsx` with Stitch HTML layout.
+   - [x] Update `types/index.ts` & `api.ts` for CognitiveAnalytics payload.
+   - [x] Implement backend simulation endpoint `/stats/analytics` in FastAPI.
+4. **Explain Changes**
+   - [x] Add summary markdown walkthrough.
+5. **Document Results**
+   - [x] Update `tasks/lessons.md`.

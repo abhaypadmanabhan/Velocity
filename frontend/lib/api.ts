@@ -94,4 +94,23 @@ export const api = {
       overallProgressPercent: raw.overall_progress_percent as number,
     }
   },
+
+  async getAnalytics(): Promise<import("@/types").AnalyticsData> {
+    const raw = await request<Record<string, unknown>>("/stats/analytics")
+    return {
+      progression: (raw.progression as Record<string, unknown>[]).map((p) => ({
+        date: p.date as string,
+        wpm: p.wpm as number,
+      })),
+      enduranceMins: raw.endurance_mins as number,
+      enduranceSustainedWpm: raw.endurance_sustained_wpm as number,
+      enduranceVsPrev: raw.endurance_vs_prev as number,
+      heatmap: (raw.heatmap as Record<string, unknown>[]).map((h) => ({
+        dayStr: h.day_str as string,
+        week: h.week as number,
+        wpm: h.wpm as number,
+        retention: h.retention as number,
+      })),
+    }
+  },
 }

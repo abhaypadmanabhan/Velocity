@@ -1,9 +1,10 @@
 "use client"
 import { useEffect, useState, useCallback, useRef } from "react"
-import { Plus, LayoutDashboard, Library, PieChart, Settings, Play, Check, ArrowRight, Trash } from "lucide-react"
+import { Play, Check, ArrowRight, Trash } from "lucide-react"
 import { db } from "@/lib/db"
 import { api } from "@/lib/api"
 import type { Book, Progress, Stats, Chapter } from "@/types"
+import { NavRail } from "@/components/NavRail"
 
 export default function DashboardPage() {
   const [books, setBooks] = useState<Book[]>([])
@@ -90,42 +91,20 @@ export default function DashboardPage() {
     <div className="flex h-screen w-full overflow-hidden antialiased bg-[#120216] text-white font-display">
       
       {/* Nav Rail */}
-      <nav className="flex h-full w-[80px] flex-col items-center border-r border-[#4a2c5a] bg-[#120216] py-6 flex-shrink-0 z-10 relative">
-        <button 
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className={`mb-8 flex h-12 w-12 items-center justify-center bg-[#ee1438] text-white hover:bg-white hover:text-[#120216] transition-colors border border-[#ee1438] group ${isUploading ? 'opacity-50' : ''}`}
-        >
-          <Plus className="w-6 h-6 group-hover:stroke-[3px] transition-all" />
-        </button>
-        <input 
-          type="file" 
-          accept=".pdf" 
-          className="hidden" 
-          ref={fileInputRef} 
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if(f) handleUpload(f)
-          }} 
-        />
-        
-        <div className="flex flex-col gap-6 w-full items-center">
-          <button onClick={() => setActiveBookId(null)} className={`flex h-12 w-12 items-center justify-center transition-colors group ${activeBookId === null ? 'bg-white text-[#120216] border border-white' : 'text-white hover:bg-[#ee1438]'}`}>
-            <LayoutDashboard className="w-6 h-6" />
-          </button>
-          <button className="flex h-12 w-12 items-center justify-center text-white hover:bg-[#ee1438] transition-colors group">
-            <Library className="w-6 h-6" />
-          </button>
-          <button className="flex h-12 w-12 items-center justify-center text-white hover:bg-[#ee1438] transition-colors group">
-            <PieChart className="w-6 h-6" />
-          </button>
-        </div>
-        <div className="mt-auto flex flex-col gap-6 w-full items-center">
-          <button className="flex h-12 w-12 items-center justify-center text-white hover:bg-[#ee1438] transition-colors group">
-            <Settings className="w-6 h-6" />
-          </button>
-        </div>
-      </nav>
+      <NavRail 
+        onAddClick={() => fileInputRef.current?.click()} 
+        isUploading={isUploading} 
+      />
+      <input 
+        type="file" 
+        accept=".pdf" 
+        className="hidden" 
+        ref={fileInputRef} 
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if(f) handleUpload(f)
+        }} 
+      />
 
       {/* Main Content */}
       <main className="flex flex-1 flex-col overflow-hidden bg-[#120216]">

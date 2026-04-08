@@ -14,13 +14,13 @@ export function useRSVP(words: string[], initialIndex = 0, initialWpm = 250) {
   useEffect(() => {
     const engine = createRSVP({ words, initialIndex, wpm: initialWpm })
     engineRef.current = engine
+    queueMicrotask(() => setState(engine.getState()))
     const unsub = engine.onTick((s) => setState({ ...s }))
     return () => {
       unsub()
       engine.destroy()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [words])
+  }, [words, initialIndex, initialWpm])
 
   return {
     state,

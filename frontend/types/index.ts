@@ -33,3 +33,23 @@ export interface Stats {
   chaptersCompleted: number
   overallProgressPercent: number
 }
+
+export interface DataPoint {
+  date: string
+  wpm: number
+}
+
+export interface HeatmapCell {
+  dayStr: string // "MON", "TUE"
+  week: number   // 1, 2, 3, 4
+  wpm: number
+  retention: number // 0-100
+}
+
+export interface AnalyticsData {
+  progression: DataPoint[]
+  enduranceMins: number
+  enduranceSustainedWpm: number
+  enduranceVsPrev: number
+  heatmap: HeatmapCell[]
+}

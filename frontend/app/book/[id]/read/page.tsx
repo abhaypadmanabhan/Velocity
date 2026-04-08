@@ -50,11 +50,12 @@ export default function ReaderPage() {
       const targetChapterIdx = parseInt(searchParams.get("chapter") ?? "0", 10)
       const targetChapter = chs.find((c) => c.index === targetChapterIdx) ?? chs[0]
 
-      if (progress && progress.wordIndex >= (targetChapter?.wordStart ?? 0)) {
+      if (progress && progress.wordIndex >= (targetChapter?.wordStart ?? 0) && progress.wordIndex <= (targetChapter?.wordEnd ?? Infinity)) {
         setInitialIndex(progress.wordIndex)
         setInitialWpm(progress.wpm)
       } else if (targetChapter) {
         setInitialIndex(targetChapter.wordStart)
+        if (progress) setInitialWpm(progress.wpm)
       }
     }
     load()
@@ -117,7 +118,11 @@ export default function ReaderPage() {
       switch (e.key) {
         case " ":
           e.preventDefault()
-          state.isPlaying ? pause() : play()
+          if (state.isPlaying) {
+            pause()
+          } else {
+            play()
+          }
           break
         case "ArrowLeft":
           seek(Math.max(0, state.currentIndex - 10))
@@ -138,7 +143,7 @@ export default function ReaderPage() {
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [state, play, pause, seek, setWpm, router, id])
+  }, [state, play, pause, seek, setWpm, router, id, allWords.length])
 
   const currentWord = allWords[state.currentIndex] ?? ""
   const orpParts = getOrpParts(currentWord)
