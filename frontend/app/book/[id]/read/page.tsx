@@ -31,6 +31,7 @@ export default function ReaderPage() {
 
   const lastSavedRef = useRef(0)
   const lastSyncRef = useRef(Date.now())
+  const stateRef = useRef({ currentIndex: 0, wpm: 250, isPlaying: false })
 
   // Load book + chapters + progress from IndexedDB
   useEffect(() => {
@@ -65,6 +66,9 @@ export default function ReaderPage() {
     initialWpm
   )
 
+  // Keep stateRef current so unmount effect can read latest values
+  useEffect(() => { stateRef.current = state }, [state])
+
   const currentChapter = useMemo(() => {
     return chapters.find(
       (ch) => state.currentIndex >= ch.wordStart && state.currentIndex <= ch.wordEnd
@@ -96,11 +100,11 @@ export default function ReaderPage() {
     }
   }, [state, allWords.length, saveProgress])
 
-  // Save on unmount
+  // Save on unmount — reads from stateRef to avoid stale closure
   useEffect(() => {
     return () => {
-      if (state.currentIndex > 0) {
-        saveProgress(state.currentIndex, state.wpm)
+      if (stateRef.current.currentIndex > 0) {
+        saveProgress(stateRef.current.currentIndex, stateRef.current.wpm)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,17 +113,17 @@ export default function ReaderPage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       switch (e.key) {
         case " ":
           e.preventDefault()
           state.isPlaying ? pause() : play()
           break
         case "ArrowLeft":
-          seek(state.currentIndex - 10)
+          seek(Math.max(0, state.currentIndex - 10))
           break
         case "ArrowRight":
-          seek(state.currentIndex + 10)
+          seek(Math.min(allWords.length - 1, state.currentIndex + 10))
           break
         case "[":
           setWpm(Math.max(100, state.wpm - 50))
@@ -174,8 +178,8 @@ export default function ReaderPage() {
           isPlaying={state.isPlaying}
           onPlay={play}
           onPause={pause}
-          onBack={() => seek(state.currentIndex - 10)}
-          onForward={() => seek(state.currentIndex + 10)}
+          onBack={() => seek(Math.max(0, state.currentIndex - 10))}
+          onForward={() => seek(Math.min(allWords.length - 1, state.currentIndex + 10))}
         />
       </div>
 
