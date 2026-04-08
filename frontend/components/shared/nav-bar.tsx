@@ -4,12 +4,13 @@ import { useRouter } from "next/navigation"
 
 interface NavBarProps {
   showBack?: boolean
+  className?: string
 }
 
-export function NavBar({ showBack = false }: NavBarProps) {
+export function NavBar({ showBack = false, className }: NavBarProps) {
   const router = useRouter()
   return (
-    <nav className="w-full h-12 bg-surface border-b border-muted flex items-center px-6 gap-4">
+    <nav className={`w-full h-12 bg-surface border-b border-muted flex items-center px-6 gap-4${className ? ` ${className}` : ""}`}>
       {showBack && (
         <button
           onClick={() => router.back()}
