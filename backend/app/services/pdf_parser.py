@@ -36,7 +36,20 @@ def parse_pdf(path: str) -> ParsedBook:
 
         if not chapters:
             full_text = _fix_hyphenation("".join(p.get_text() for p in doc))
-            chapters = [ParsedChapter(title="Full Document", index=0, words=_split_words(full_text))]
+            all_words = _split_words(full_text)
+            
+            if len(all_words) > 5000:
+                chunk_size = 3000
+                chapters = []
+                for i in range(0, len(all_words), chunk_size):
+                    chunk_words = all_words[i:i+chunk_size]
+                    chapters.append(ParsedChapter(
+                        title=f"Part {len(chapters) + 1}",
+                        index=len(chapters),
+                        words=chunk_words
+                    ))
+            else:
+                chapters = [ParsedChapter(title="Full Document", index=0, words=all_words)]
 
         all_words: list[str] = []
         for ch in chapters:

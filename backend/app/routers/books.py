@@ -1,4 +1,6 @@
 import uuid
+import re
+import urllib.parse
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 from app.db import get_db
@@ -7,6 +9,18 @@ from app.models.book import Book, Chapter
 from app.schemas.book import BookSchema
 from app.services.pdf_parser import parse_pdf
 from app.services.storage import delete_pdf, save_pdf
+
+def generate_display_title(parsed_title: str, filename: str) -> str:
+    title = parsed_title
+    if not title or title.lower() == "untitled" or "http://" in title or "https://" in title:
+        title = filename.removesuffix(".pdf")
+    
+    title = urllib.parse.unquote(title)
+    # Remove prefix like 'personal-'
+    title = re.sub(r'^personal\s*[-_]?\s*', '', title, flags=re.IGNORECASE)
+    title = re.sub(r'[-_]', ' ', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    return title.title()
 
 router = APIRouter(prefix="/books", tags=["books"])
 
@@ -26,7 +40,7 @@ def upload_book(file: UploadFile = File(...), db: Session = Depends(get_db)):
         delete_pdf(book_id)
         raise HTTPException(status_code=422, detail="Could not parse PDF")
 
-    display_title = parsed.title if parsed.title != "Untitled" else file.filename.removesuffix(".pdf")
+    display_title = generate_display_title(parsed.title, file.filename)
 
     book = Book(
         id=book_id,
