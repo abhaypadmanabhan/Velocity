@@ -10,6 +10,7 @@ export default function ChaptersPage() {
   const { id } = useParams<{ id: string }>()
   const [book, setBook] = useState<Book | null>(null)
   const [progress, setProgress] = useState<Progress | null>(null)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -17,16 +18,28 @@ export default function ChaptersPage() {
       if (stored) setBook(stored)
       const p = await db.progress.get(id)
       if (p) setProgress(p)
+      setLoaded(true)
     }
     load()
   }, [id])
+
+  if (!loaded) {
+    return (
+      <div className="min-h-screen bg-bg-dark">
+        <NavBar showBack />
+        <main className="max-w-3xl mx-auto px-6 py-8">
+          <p className="font-mono text-muted text-sm">Loading...</p>
+        </main>
+      </div>
+    )
+  }
 
   if (!book) {
     return (
       <div className="min-h-screen bg-bg-dark">
         <NavBar showBack />
         <main className="max-w-3xl mx-auto px-6 py-8">
-          <p className="font-mono text-muted text-sm">Loading...</p>
+          <p className="font-mono text-muted text-sm">Book not found.</p>
         </main>
       </div>
     )

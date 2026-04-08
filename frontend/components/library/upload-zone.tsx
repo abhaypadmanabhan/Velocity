@@ -31,7 +31,7 @@ export function UploadZone({ onUpload, isUploading }: UploadZoneProps) {
       className={`block w-full border-2 border-dashed p-12 text-center cursor-pointer transition-colors
         ${isDragging ? "border-primary bg-surface" : "border-muted hover:border-accent-purple"}
         ${isUploading ? "opacity-50 pointer-events-none" : ""}`}
-      onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+      onDragOver={(e) => { e.preventDefault(); if (!isDragging) setIsDragging(true) }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
     >

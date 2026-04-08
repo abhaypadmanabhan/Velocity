@@ -1,3 +1,5 @@
+"use client"
+import { useMemo } from "react"
 import type { Chapter, Progress } from "@/types"
 import { ChapterItem } from "./chapter-item"
 
@@ -8,7 +10,7 @@ interface ChapterListProps {
 }
 
 export function ChapterList({ chapters, bookId, progress }: ChapterListProps) {
-  const sorted = [...chapters].sort((a, b) => a.index - b.index)
+  const sorted = useMemo(() => [...chapters].sort((a, b) => a.index - b.index), [chapters])
   return (
     <div>
       {sorted.map((ch) => (
