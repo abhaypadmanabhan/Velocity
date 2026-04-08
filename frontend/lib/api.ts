@@ -83,4 +83,15 @@ export const api = {
     })
     return snakeToCamelProgress(raw)
   },
+
+  async getStats(): Promise<import("@/types").Stats> {
+    const raw = await request<Record<string, unknown>>("/stats/")
+    return {
+      totalBooks: raw.total_books as number,
+      totalWordsRead: raw.total_words_read as number,
+      avgWpm: raw.avg_wpm as number,
+      chaptersCompleted: raw.chapters_completed as number,
+      overallProgressPercent: raw.overall_progress_percent as number,
+    }
+  },
 }

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brutalist Velocity - Reader Focus Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#ee1438",
+          "background-light": "#f8f6f6",
+          "background-dark": "#120216",
+          "surface": "#1e0824",
+          "muted": "#4a2c5a",
+          "accent": "#dbb8ff"
+        },
+        fontFamily: {
+          "display": ["Space Grotesk", "sans-serif"],
+          "mono": ["JetBrains Mono", "monospace"]
+        },
+        borderRadius: {"DEFAULT": "0px", "sm": "0px", "md": "0px", "lg": "0px", "xl": "0px", "full": "0px"},
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: theme('colors.background-dark');
+    color: theme('colors.white');
+    font-family: theme('fontFamily.display');
+    margin: 0;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body class="bg-background-dark text-white flex flex-col h-screen w-screen selection:bg-primary selection:text-white relative">
+<!-- Context Window (Top Edge) -->
+<div class="w-full bg-surface border-b border-muted min-h-[64px] flex items-center justify-center px-8 py-4 transition-all duration-300 relative z-20">
+<button class="absolute left-6 top-1/2 -translate-y-1/2 text-muted hover:text-white transition-colors p-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="max-w-[960px] w-full text-center">
+<p class="text-accent text-sm font-normal leading-relaxed opacity-80 font-mono tracking-wide uppercase">
+        It strips away UI clutter to force total focus, utilizing <span class="text-white font-bold bg-surface/50 border-b border-primary pb-[1px]">Optimal</span> Recognition Point technology and brutalist aesthetics to train users to read at 800+ WPM.
+      </p>
+</div>
+<div class="absolute right-6 top-1/2 -translate-y-1/2 font-mono text-muted text-sm tracking-widest uppercase">
+      Ch 01 / 84%
+    </div>
+</div>
+<!-- Main RSVP Display Area -->
+<main class="flex-1 flex flex-col items-center justify-center relative w-full h-full">
+<!-- Paused Status Overlay -->
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10 opacity-100">
+<span class="font-mono text-primary text-xl font-bold tracking-[0.2em] mb-2 uppercase border border-primary px-4 py-1">Paused</span>
+<span class="font-mono text-muted text-xs uppercase tracking-widest">[Space] to Resume</span>
+</div>
+<!-- RSVP Word Container -->
+<!-- 
+      Note: The active word is mathematically centered based on the ORP letter. 
+      In this example "cOgnitive", the 'O' is the anchor.
+      Paused state color: accent. Playing state: white.
+    -->
+<div class="relative flex items-center justify-center h-[200px] w-full text-center mt-[-64px]">
+<!-- Alignment Guides (Brutalist aesthetic) -->
+<div class="absolute w-[1px] h-32 bg-muted/30 top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-0"></div>
+<div class="absolute w-64 h-[1px] bg-muted/30 top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-0"></div>
+<!-- The Word -->
+<div class="font-display font-bold text-[80px] md:text-[120px] leading-none tracking-tight text-accent relative z-10 flex select-none">
+<span class="text-accent">c</span>
+<span class="text-primary relative inline-block">o
+             <!-- ORP Indicator Line above/below optional, keeping minimal as per spec -->
+</span>
+<span class="text-accent">gnitive</span>
+</div>
+</div>
+</main>
+<!-- Tactile WPM Slider (Bottom Edge) -->
+<div class="w-full absolute bottom-0 left-0 h-16 flex flex-col justify-end group cursor-ew-resize z-20">
+<!-- Floating Telemetry (Shows on hover/drag) -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono flex flex-col items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+<div class="bg-surface border border-muted px-3 py-1 flex items-baseline gap-2 mb-2">
+<span class="text-white text-lg font-bold">850</span>
+<span class="text-primary text-xs tracking-widest uppercase">WPM</span>
+</div>
+</div>
+<!-- The Slider Track -->
+<div class="w-full h-[4px] bg-surface relative border-t border-muted">
+<!-- The Active Fill -->
+<div class="absolute top-0 left-0 h-full bg-primary w-[75%] transition-all duration-75"></div>
+<!-- The Thumb -->
+<div class="absolute top-1/2 left-[75%] -translate-x-1/2 -translate-y-1/2 w-4 h-8 bg-white border border-background-dark shadow-[0_0_10px_rgba(238,20,56,0.3)] hover:scale-y-125 transition-transform duration-100"></div>
+</div>
+</div>
+<!-- Keyboard Shortcuts Hints (Bottom Corners) -->
+<div class="absolute bottom-8 left-6 font-mono text-xs text-muted tracking-widest uppercase pointer-events-none">
+    [UP/DOWN] WPM ±10
+  </div>
+<div class="absolute bottom-8 right-6 font-mono text-xs text-muted tracking-widest uppercase pointer-events-none flex items-center gap-2">
+<span>Auto-Adapt</span>
+<div class="w-2 h-2 bg-primary"></div>
+</div>
+</body></html>

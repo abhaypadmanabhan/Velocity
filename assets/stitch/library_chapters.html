@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brutalist Velocity - Library &amp; Chapters</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#ee1438",
+          "background-light": "#f8f6f6",
+          "background-dark": "#120216",
+          "surface": "#1e0824",
+          "muted": "#4a2c5a",
+          "accent": "#dbb8ff",
+          "text": "#ffffff",
+        },
+        fontFamily: {
+          "display": ["Space Grotesk", "sans-serif"],
+          "mono": ["JetBrains Mono", "monospace"],
+        },
+        borderRadius: {
+          "DEFAULT": "0px",
+          "sm": "0px",
+          "md": "0px",
+          "lg": "0px",
+          "xl": "0px",
+          "full": "0px"
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: theme('colors.background-dark');
+    color: theme('colors.text');
+    font-family: theme('fontFamily.display');
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Aggressive snap scrolling for gallery */
+  .snap-x-mandatory {
+    scroll-snap-type: x mandatory;
+  }
+  .snap-center {
+    scroll-snap-align: center;
+  }
+  
+  /* Custom scrollbar to hide it but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+</head>
+<body class="flex h-screen w-full overflow-hidden antialiased">
+<!-- Nav Rail (Shared Component Included as Destination Screen) -->
+<nav class="flex h-full w-[80px] flex-col items-center border-r border-muted bg-background-dark py-6 flex-shrink-0 z-10 relative">
+<!-- Sticky + Button -->
+<button class="mb-8 flex h-12 w-12 items-center justify-center bg-primary text-text hover:bg-white hover:text-background-dark transition-colors border border-primary group">
+<span class="material-symbols-outlined text-2xl group-hover:font-bold transition-all">add</span>
+</button>
+<div class="flex flex-col gap-6 w-full items-center">
+<!-- Dashboard -->
+<a class="flex h-12 w-12 items-center justify-center text-text hover:bg-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</a>
+<!-- Library (Active) -->
+<a class="flex h-12 w-12 items-center justify-center bg-white text-background-dark border border-white" href="#">
+<span class="material-symbols-outlined" data-icon="library_books" style="font-variation-settings: 'FILL' 1;">library_books</span>
+</a>
+<!-- Analytics -->
+<a class="flex h-12 w-12 items-center justify-center text-text hover:bg-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col gap-6 w-full items-center">
+<!-- Settings -->
+<a class="flex h-12 w-12 items-center justify-center text-text hover:bg-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex flex-1 flex-col overflow-hidden bg-background-dark">
+<!-- Top Horizontal Band: PDF Library Gallery -->
+<section class="flex flex-col border-b border-muted py-8 h-[380px] flex-shrink-0">
+<div class="px-8 mb-4">
+<h1 class="text-3xl font-bold uppercase tracking-wider text-muted">Library</h1>
+</div>
+<!-- Horizontal Scroll Container -->
+<div class="flex flex-1 overflow-x-auto snap-x-mandatory no-scrollbar px-8 gap-6 pb-4 items-center">
+<!-- Active Cover Block -->
+<button class="snap-center flex-shrink-0 h-[280px] w-[200px] bg-white text-background-dark border border-white p-6 flex flex-col justify-between group transition-transform hover:-translate-y-1">
+<div class="text-left">
+<p class="font-mono text-xs font-bold mb-2 uppercase tracking-widest text-primary">Active</p>
+<h2 class="text-2xl font-bold uppercase leading-tight">NEUROMANCER</h2>
+</div>
+<div class="text-left mt-auto">
+<p class="text-sm font-medium">William Gibson</p>
+</div>
+</button>
+<!-- Standard Cover Block -->
+<button class="snap-center flex-shrink-0 h-[280px] w-[200px] bg-surface text-text border border-muted p-6 flex flex-col justify-between hover:border-primary hover:text-primary transition-all group">
+<div class="text-left">
+<h2 class="text-2xl font-bold uppercase leading-tight group-hover:text-primary transition-colors">DEEP WORK</h2>
+</div>
+<div class="text-left mt-auto">
+<p class="text-sm font-medium text-muted group-hover:text-text transition-colors">Cal Newport</p>
+</div>
+</button>
+<!-- Standard Cover Block -->
+<button class="snap-center flex-shrink-0 h-[280px] w-[200px] bg-surface text-text border border-muted p-6 flex flex-col justify-between hover:border-primary hover:text-primary transition-all group">
+<div class="text-left">
+<h2 class="text-2xl font-bold uppercase leading-tight group-hover:text-primary transition-colors">MEDITATIONS</h2>
+</div>
+<div class="text-left mt-auto">
+<p class="text-sm font-medium text-muted group-hover:text-text transition-colors">Marcus Aurelius</p>
+</div>
+</button>
+<!-- Standard Cover Block -->
+<button class="snap-center flex-shrink-0 h-[280px] w-[200px] bg-surface text-text border border-muted p-6 flex flex-col justify-between hover:border-primary hover:text-primary transition-all group">
+<div class="text-left">
+<h2 class="text-2xl font-bold uppercase leading-tight group-hover:text-primary transition-colors">DUNE</h2>
+</div>
+<div class="text-left mt-auto">
+<p class="text-sm font-medium text-muted group-hover:text-text transition-colors">Frank Herbert</p>
+</div>
+</button>
+<!-- Standard Cover Block -->
+<button class="snap-center flex-shrink-0 h-[280px] w-[200px] bg-surface text-text border border-muted p-6 flex flex-col justify-between hover:border-primary hover:text-primary transition-all group">
+<div class="text-left">
+<h2 class="text-2xl font-bold uppercase leading-tight group-hover:text-primary transition-colors">SNOW CRASH</h2>
+</div>
+<div class="text-left mt-auto">
+<p class="text-sm font-medium text-muted group-hover:text-text transition-colors">Neal Stephenson</p>
+</div>
+</button>
+</div>
+</section>
+<!-- Bottom Band: Detailed Statistical View and Chapter Architecture -->
+<section class="flex flex-1 flex-col overflow-hidden">
+<!-- Action Bar -->
+<div class="flex items-center justify-between px-8 py-4 border-b border-muted bg-surface/50">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold uppercase tracking-widest text-primary">NEUROMANCER</h2>
+<span class="font-mono text-xs text-accent">William Gibson</span>
+</div>
+<button class="bg-primary text-text px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-white hover:text-background-dark transition-colors flex items-center gap-2">
+        Start Chapter <span class="material-symbols-outlined text-sm">play_arrow</span>
+</button>
+</div>
+<div class="flex flex-1 overflow-hidden">
+<!-- Detailed Statistical View (Left Column) -->
+<div class="w-1/3 border-r border-muted bg-surface p-8 flex flex-col gap-10 overflow-y-auto no-scrollbar">
+<!-- Stat Block -->
+<div class="flex flex-col">
+<span class="font-mono text-xs uppercase tracking-widest text-muted mb-2">Chapters Completed</span>
+<div class="text-5xl font-bold text-text">12 <span class="text-2xl text-muted">/ 24</span></div>
+</div>
+<!-- Stat Block -->
+<div class="flex flex-col">
+<span class="font-mono text-xs uppercase tracking-widest text-muted mb-2">Avg WPM</span>
+<div class="text-5xl font-bold text-text border-b-2 border-primary inline-block pb-1 self-start">840</div>
+</div>
+<!-- Stat Block -->
+<div class="flex flex-col">
+<span class="font-mono text-xs uppercase tracking-widest text-muted mb-2">Overall Progress</span>
+<div class="text-5xl font-bold text-text">50%</div>
+</div>
+<!-- Stat Block -->
+<div class="flex flex-col">
+<span class="font-mono text-xs uppercase tracking-widest text-muted mb-2">Retention Est.</span>
+<div class="text-5xl font-bold text-accent">92%</div>
+</div>
+</div>
+<!-- Chapter Architecture (Right Column) -->
+<div class="w-2/3 flex flex-col overflow-hidden bg-background-dark">
+<!-- Table Header -->
+<div class="flex px-8 py-4 border-b border-muted bg-surface font-mono text-xs text-muted uppercase tracking-widest">
+<div class="flex-1">Chapter</div>
+<div class="w-32 text-right">Word Count</div>
+<div class="w-32 text-right">Est. Time</div>
+</div>
+<!-- Table Body (Scrollable) -->
+<div class="flex-1 overflow-y-auto no-scrollbar font-mono text-sm">
+<!-- Data Row (Completed) -->
+<div class="flex px-8 py-4 border-b border-muted items-center hover:bg-surface transition-colors cursor-pointer opacity-50 group">
+<div class="flex-1 flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-primary">check</span>
+<span class="group-hover:text-primary transition-colors font-display text-base">01. Chiba City Blues</span>
+</div>
+<div class="w-32 text-right text-muted">5,420</div>
+<div class="w-32 text-right text-muted">06:27</div>
+</div>
+<!-- Data Row (Active) -->
+<div class="flex px-8 py-4 border-b border-primary bg-surface items-center cursor-pointer">
+<div class="flex-1 flex items-center gap-3">
+<span class="material-symbols-outlined text-sm animate-pulse text-primary">arrow_forward</span>
+<span class="text-primary font-display font-bold text-base">13. The Sprawl</span>
+</div>
+<div class="w-32 text-right text-text">6,105</div>
+<div class="w-32 text-right text-accent font-bold">07:16</div>
+</div>
+<!-- Data Row (Pending) -->
+<div class="flex px-8 py-4 border-b border-muted items-center hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex-1 flex items-center gap-3 pl-7">
+<span class="group-hover:text-primary transition-colors font-display text-base text-text">14. Zion Cluster</span>
+</div>
+<div class="w-32 text-right text-muted">4,890</div>
+<div class="w-32 text-right text-text group-hover:text-accent transition-colors">05:49</div>
+</div>
+<!-- Data Row (Pending) -->
+<div class="flex px-8 py-4 border-b border-muted items-center hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex-1 flex items-center gap-3 pl-7">
+<span class="group-hover:text-primary transition-colors font-display text-base text-text">15. Freeside</span>
+</div>
+<div class="w-32 text-right text-muted">8,210</div>
+<div class="w-32 text-right text-text group-hover:text-accent transition-colors">09:46</div>
+</div>
+<!-- Data Row (Pending) -->
+<div class="flex px-8 py-4 border-b border-muted items-center hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex-1 flex items-center gap-3 pl-7">
+<span class="group-hover:text-primary transition-colors font-display text-base text-text">16. Villa Straylight</span>
+</div>
+<div class="w-32 text-right text-muted">7,550</div>
+<div class="w-32 text-right text-text group-hover:text-accent transition-colors">08:59</div>
+</div>
+<!-- Data Row (Pending) -->
+<div class="flex px-8 py-4 border-b border-muted items-center hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex-1 flex items-center gap-3 pl-7">
+<span class="group-hover:text-primary transition-colors font-display text-base text-text">17. Wintermute</span>
+</div>
+<div class="w-32 text-right text-muted">9,100</div>
+<div class="w-32 text-right text-text group-hover:text-accent transition-colors">10:49</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

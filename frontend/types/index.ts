@@ -25,3 +25,11 @@ export interface Progress {
   wpm: number
   lastReadAt: string
 }
+
+export interface Stats {
+  totalBooks: number
+  totalWordsRead: number
+  avgWpm: number
+  chaptersCompleted: number
+  overallProgressPercent: number
+}

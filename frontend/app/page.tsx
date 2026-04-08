@@ -1,29 +1,42 @@
 "use client"
-import { useEffect, useState, useCallback } from "react"
-import { NavBar } from "@/components/shared/nav-bar"
-import { UploadZone } from "@/components/library/upload-zone"
-import { BookGrid } from "@/components/library/book-grid"
+import { useEffect, useState, useCallback, useRef } from "react"
+import { Plus, LayoutDashboard, Library, PieChart, Settings, Play, Check, ArrowRight, Trash } from "lucide-react"
 import { db } from "@/lib/db"
 import { api } from "@/lib/api"
-import type { Book, Progress } from "@/types"
+import type { Book, Progress, Stats, Chapter } from "@/types"
 
-export default function LibraryPage() {
+export default function DashboardPage() {
   const [books, setBooks] = useState<Book[]>([])
   const [progress, setProgress] = useState<Record<string, Progress>>({})
+  const [globalStats, setGlobalStats] = useState<Stats | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [deletingBookIds, setDeletingBookIds] = useState<Set<string>>(new Set())
+  const [activeBookId, setActiveBookId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const loadBooks = useCallback(async () => {
+  const loadData = useCallback(async () => {
+    // Local data
     const stored = await db.books.orderBy("createdAt").reverse().toArray()
     setBooks(stored)
     const allProgress = await db.progress.toArray()
     setProgress(Object.fromEntries(allProgress.map((p) => [p.bookId, p])))
+    
+    // Global stats from API
+    try {
+      const stats = await api.getStats()
+      setGlobalStats(stats)
+    } catch(e) {
+      console.warn("Could not fetch global stats", e)
+    }
+    
+    // If no active book and books exist, select the first one (or keep null to show global stats)
+    // Actually, keeping it null allows seeing global stats by default, which matches reqs.
   }, [])
 
-  useEffect(() => { loadBooks() }, [loadBooks])
+  useEffect(() => { loadData() }, [loadData])
 
-  const handleUpload = useCallback(async (file: File) => {
+  const handleUpload = async (file: File) => {
     setIsUploading(true)
     setError(null)
     try {
@@ -31,20 +44,16 @@ export default function LibraryPage() {
       await db.books.put(book)
       await Promise.all(book.chapters.map((ch) => db.chapters.put(ch)))
       setBooks((prev) => [book, ...prev])
+      setActiveBookId(book.id)
+      loadData() // refresh stats
     } catch (err) {
-      setError("Upload failed. Make sure the backend is running at localhost:8000.")
-      console.error("Upload failed:", err)
+      setError("Upload failed.")
     } finally {
       setIsUploading(false)
     }
-  }, [])
+  }
 
-  const handleDelete = useCallback(async (bookId: string) => {
-    if (deletingBookIds.has(bookId)) return
-
-    setError(null)
-    setDeletingBookIds((prev) => new Set(prev).add(bookId))
-
+  const handleDelete = async (bookId: string) => {
     try {
       await api.deleteBook(bookId)
       await db.transaction("rw", db.books, db.chapters, db.progress, async () => {
@@ -58,37 +67,250 @@ export default function LibraryPage() {
         delete next[bookId]
         return next
       })
+      if (activeBookId === bookId) setActiveBookId(null)
+      loadData()
     } catch (err) {
-      setError("Delete failed. Please try again.")
-      console.error("Delete failed:", err)
-    } finally {
-      setDeletingBookIds((prev) => {
-        const next = new Set(prev)
-        next.delete(bookId)
-        return next
-      })
+      setError("Delete failed.")
     }
-  }, [deletingBookIds])
+  }
+
+  const activeBook = books.find(b => b.id === activeBookId)
+  const activeProgress = activeBook ? progress[activeBook.id] : null
+
+  // Calculate book specific stats if active
+  let bookChaptersCompleted = 0
+  let bookProgressPercent = 0
+  if (activeBook && activeProgress) {
+    const readWords = activeProgress.wordIndex
+    bookChaptersCompleted = activeBook.chapters.filter(ch => ch.wordEnd <= readWords).length
+    bookProgressPercent = Math.round((readWords / Math.max(1, activeBook.totalWords)) * 100)
+  }
 
   return (
-    <div className="min-h-screen bg-bg-dark">
-      <NavBar />
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <h1 className="font-display font-bold text-3xl text-white mb-8 uppercase tracking-wide">
-          Library
-        </h1>
-        <UploadZone onUpload={handleUpload} isUploading={isUploading} />
-        {error && (
-          <p className="font-mono text-xs text-primary mt-3">{error}</p>
-        )}
-        <div className="mt-8">
-          <BookGrid
-            books={books}
-            progress={progress}
-            deletingBookIds={deletingBookIds}
-            onDelete={handleDelete}
-          />
+    <div className="flex h-screen w-full overflow-hidden antialiased bg-[#120216] text-white font-display">
+      
+      {/* Nav Rail */}
+      <nav className="flex h-full w-[80px] flex-col items-center border-r border-[#4a2c5a] bg-[#120216] py-6 flex-shrink-0 z-10 relative">
+        <button 
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className={`mb-8 flex h-12 w-12 items-center justify-center bg-[#ee1438] text-white hover:bg-white hover:text-[#120216] transition-colors border border-[#ee1438] group ${isUploading ? 'opacity-50' : ''}`}
+        >
+          <Plus className="w-6 h-6 group-hover:stroke-[3px] transition-all" />
+        </button>
+        <input 
+          type="file" 
+          accept=".pdf" 
+          className="hidden" 
+          ref={fileInputRef} 
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if(f) handleUpload(f)
+          }} 
+        />
+        
+        <div className="flex flex-col gap-6 w-full items-center">
+          <button onClick={() => setActiveBookId(null)} className={`flex h-12 w-12 items-center justify-center transition-colors group ${activeBookId === null ? 'bg-white text-[#120216] border border-white' : 'text-white hover:bg-[#ee1438]'}`}>
+            <LayoutDashboard className="w-6 h-6" />
+          </button>
+          <button className="flex h-12 w-12 items-center justify-center text-white hover:bg-[#ee1438] transition-colors group">
+            <Library className="w-6 h-6" />
+          </button>
+          <button className="flex h-12 w-12 items-center justify-center text-white hover:bg-[#ee1438] transition-colors group">
+            <PieChart className="w-6 h-6" />
+          </button>
         </div>
+        <div className="mt-auto flex flex-col gap-6 w-full items-center">
+          <button className="flex h-12 w-12 items-center justify-center text-white hover:bg-[#ee1438] transition-colors group">
+            <Settings className="w-6 h-6" />
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex flex-1 flex-col overflow-hidden bg-[#120216]">
+        {/* Gallery */}
+        <section className="flex flex-col border-b border-[#4a2c5a] py-8 h-[380px] flex-shrink-0">
+          <div className="px-8 mb-4 flex justify-between items-end">
+            <h1 className="text-3xl font-bold uppercase tracking-wider text-[#4a2c5a]">Library</h1>
+            {error && <span className="text-[#ee1438] font-mono text-sm">{error}</span>}
+          </div>
+          <div className="flex flex-1 overflow-x-auto snap-x-mandatory px-8 gap-6 pb-4 items-center" style={{ scrollbarWidth: 'none' }}>
+            {books.map(book => {
+              const isActive = book.id === activeBookId
+              return (
+                <button
+                  key={book.id}
+                  onClick={() => setActiveBookId(book.id)}
+                  className={`snap-center flex-shrink-0 h-[280px] w-[200px] p-6 flex flex-col justify-between transition-all group ${
+                    isActive 
+                    ? 'bg-white text-[#120216] border border-white transform hover:-translate-y-1' 
+                    : 'bg-[#1e0824] text-white border border-[#4a2c5a] hover:border-[#ee1438] hover:text-[#ee1438]'
+                  }`}
+                >
+                  <div className="text-left">
+                    {isActive && <p className="font-mono text-xs font-bold mb-2 uppercase tracking-widest text-[#ee1438]">Active</p>}
+                    <h2 className={`text-2xl font-bold uppercase leading-tight ${!isActive ? 'group-hover:text-[#ee1438] transition-colors' : ''}`}>
+                      {book.title}
+                    </h2>
+                  </div>
+                  <div className="text-left mt-auto">
+                    <p className={`text-sm font-medium ${isActive ? '' : 'text-[#4a2c5a] group-hover:text-white transition-colors'}`}>
+                      {book.author || "Unknown"}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+            {books.length === 0 && !isUploading && (
+              <div className="h-[280px] w-[200px] border border-dashed border-[#4a2c5a] flex items-center justify-center text-[#4a2c5a]">
+                <p className="font-mono text-xs uppercase text-center px-4">Upload a book<br/>to start</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Detailed Stats */}
+        <section className="flex flex-1 flex-col overflow-hidden">
+          {/* Action Header */}
+          <div className="flex items-center justify-between px-8 py-4 border-b border-[#4a2c5a] bg-[#1e0824]/50">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-bold uppercase tracking-widest text-[#ee1438]">
+                {activeBook ? activeBook.title : "Global Overview"}
+              </h2>
+              {activeBook && <span className="font-mono text-xs text-[#dbb8ff]">{activeBook.author || "Unknown"}</span>}
+            </div>
+            
+            {activeBook && (
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => handleDelete(activeBook.id)} 
+                  className="bg-transparent border border-[#ee1438] text-[#ee1438] px-4 py-3 hover:bg-[#ee1438] hover:text-white transition-colors flex items-center"
+                >
+                  <Trash className="w-4 h-4" />
+                </button>
+                <button className="bg-[#ee1438] text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-white hover:text-[#120216] transition-colors flex items-center gap-2">
+                  START CHAPTER <Play className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex flex-1 overflow-hidden">
+            {/* Left Col: Stats */}
+            <div className="w-1/3 border-r border-[#4a2c5a] bg-[#1e0824] p-8 flex flex-col gap-10 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+              <div className="flex flex-col">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#4a2c5a] mb-2">
+                  {activeBook ? "Chapters Completed" : "Total Books"}
+                </span>
+                <div className="text-5xl font-bold text-white">
+                  {activeBook 
+                    ? <>{bookChaptersCompleted} <span className="text-2xl text-[#4a2c5a]">/ {activeBook.chapters.length}</span></>
+                    : globalStats?.totalBooks || 0
+                  }
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#4a2c5a] mb-2">Avg WPM</span>
+                <div className="text-5xl font-bold text-white border-b-2 border-[#ee1438] inline-block pb-1 self-start">
+                  {activeBook ? (activeProgress?.wpm || 0) : globalStats?.avgWpm || 0}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#4a2c5a] mb-2">Overall Progress</span>
+                <div className="text-5xl font-bold text-white">
+                  {activeBook ? `${bookProgressPercent}%` : `${globalStats?.overallProgressPercent || 0}%`}
+                </div>
+              </div>
+              {!activeBook && (
+                <div className="flex flex-col">
+                  <span className="font-mono text-xs uppercase tracking-widest text-[#4a2c5a] mb-2">Total Words Read</span>
+                  <div className="text-5xl font-bold text-[#dbb8ff]">
+                    {globalStats?.totalWordsRead || 0}
+                  </div>
+                </div>
+              )}
+              {activeBook && (
+                <div className="flex flex-col">
+                  <span className="font-mono text-xs uppercase tracking-widest text-[#4a2c5a] mb-2">Retention Est.</span>
+                  <div className="text-5xl font-bold text-[#dbb8ff]">92%</div>
+                </div>
+              )}
+            </div>
+            
+            {/* Right Col: Chapters or Global Info */}
+            <div className="w-2/3 flex flex-col overflow-hidden bg-[#120216]">
+              {activeBook ? (
+                <>
+                  <div className="flex px-8 py-4 border-b border-[#4a2c5a] bg-[#1e0824] font-mono text-xs text-[#4a2c5a] uppercase tracking-widest">
+                    <div className="flex-1">Chapter</div>
+                    <div className="w-32 text-right">Word Count</div>
+                    <div className="w-32 text-right">Est. Time</div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto font-mono text-sm" style={{ scrollbarWidth: 'none' }}>
+                    {activeBook.chapters.map((ch, idx) => {
+                      const words = ch.wordEnd - ch.wordStart + 1;
+                      const timeMins = activeProgress?.wpm ? Math.ceil(words / activeProgress.wpm) : Math.ceil(words/250);
+                      
+                      const isCompleted = ch.wordEnd <= (activeProgress?.wordIndex || 0);
+                      const isPending = ch.wordStart > (activeProgress?.wordIndex || 0);
+                      const isActive = !isCompleted && !isPending;
+
+                      if (isCompleted) {
+                        return (
+                          <div key={ch.id} className="flex px-8 py-4 border-b border-[#4a2c5a] items-center hover:bg-[#1e0824] transition-colors cursor-pointer opacity-50 group">
+                            <div className="flex-1 flex items-center gap-3">
+                              <Check className="w-4 h-4 text-[#ee1438]" />
+                              <span className="group-hover:text-[#ee1438] transition-colors font-display text-base">
+                                {String(idx+1).padStart(2, '0')}. {ch.title}
+                              </span>
+                            </div>
+                            <div className="w-32 text-right text-[#4a2c5a]">{words.toLocaleString()}</div>
+                            <div className="w-32 text-right text-[#4a2c5a]">{timeMins}m</div>
+                          </div>
+                        )
+                      }
+                      if (isActive) {
+                        return (
+                          <div key={ch.id} className="flex px-8 py-4 border-b border-[#ee1438] bg-[#1e0824] items-center cursor-pointer">
+                            <div className="flex-1 flex items-center gap-3">
+                              <ArrowRight className="w-4 h-4 text-[#ee1438] animate-pulse" />
+                              <span className="text-[#ee1438] font-display font-bold text-base">
+                                {String(idx+1).padStart(2, '0')}. {ch.title}
+                              </span>
+                            </div>
+                            <div className="w-32 text-right text-white">{words.toLocaleString()}</div>
+                            <div className="w-32 text-right text-[#dbb8ff] font-bold">{timeMins}m</div>
+                          </div>
+                        )
+                      }
+                      return (
+                        <div key={ch.id} className="flex px-8 py-4 border-b border-[#4a2c5a] items-center hover:bg-[#1e0824] transition-colors cursor-pointer group">
+                          <div className="flex-1 flex items-center gap-3 pl-7">
+                            <span className="group-hover:text-[#ee1438] transition-colors font-display text-base text-white">
+                              {String(idx+1).padStart(2, '0')}. {ch.title}
+                            </span>
+                          </div>
+                          <div className="w-32 text-right text-[#4a2c5a]">{words.toLocaleString()}</div>
+                          <div className="w-32 text-right text-white group-hover:text-[#dbb8ff] transition-colors">{timeMins}m</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-1 items-center justify-center p-12 text-center text-[#4a2c5a]">
+                  <div>
+                    <h3 className="font-display font-bold text-2xl uppercase tracking-widest text-[#4a2c5a] mb-4">No Book Selected</h3>
+                    <p className="font-mono text-sm max-w-sm mx-auto">
+                      Select a book from the library gallery above to view its chapter architecture and progress stats, or use the Add button to upload a new PDF.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
