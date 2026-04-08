@@ -51,3 +51,20 @@ describe("api.updateProgress", () => {
     expect(result.wordIndex).toBe(10)
   })
 })
+
+describe("api.deleteBook", () => {
+  it("deletes a book by id", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      status: 204,
+      json: async () => ({}),
+    } as Response)
+
+    await api.deleteBook("b1")
+
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:8000/books/b1",
+      expect.objectContaining({ method: "DELETE" }),
+    )
+  })
+})

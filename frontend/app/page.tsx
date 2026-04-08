@@ -11,6 +11,7 @@ export default function LibraryPage() {
   const [books, setBooks] = useState<Book[]>([])
   const [progress, setProgress] = useState<Record<string, Progress>>({})
   const [isUploading, setIsUploading] = useState(false)
+  const [deletingBookIds, setDeletingBookIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
 
   const loadBooks = useCallback(async () => {
@@ -38,6 +39,37 @@ export default function LibraryPage() {
     }
   }, [])
 
+  const handleDelete = useCallback(async (bookId: string) => {
+    if (deletingBookIds.has(bookId)) return
+
+    setError(null)
+    setDeletingBookIds((prev) => new Set(prev).add(bookId))
+
+    try {
+      await api.deleteBook(bookId)
+      await db.transaction("rw", db.books, db.chapters, db.progress, async () => {
+        await db.books.delete(bookId)
+        await db.chapters.where("bookId").equals(bookId).delete()
+        await db.progress.delete(bookId)
+      })
+      setBooks((prev) => prev.filter((book) => book.id !== bookId))
+      setProgress((prev) => {
+        const next = { ...prev }
+        delete next[bookId]
+        return next
+      })
+    } catch (err) {
+      setError("Delete failed. Please try again.")
+      console.error("Delete failed:", err)
+    } finally {
+      setDeletingBookIds((prev) => {
+        const next = new Set(prev)
+        next.delete(bookId)
+        return next
+      })
+    }
+  }, [deletingBookIds])
+
   return (
     <div className="min-h-screen bg-bg-dark">
       <NavBar />
@@ -50,7 +82,12 @@ export default function LibraryPage() {
           <p className="font-mono text-xs text-primary mt-3">{error}</p>
         )}
         <div className="mt-8">
-          <BookGrid books={books} progress={progress} />
+          <BookGrid
+            books={books}
+            progress={progress}
+            deletingBookIds={deletingBookIds}
+            onDelete={handleDelete}
+          />
         </div>
       </main>
     </div>
